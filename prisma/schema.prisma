@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id        String   @id
+  name      String   @unique
+  themeId   String?   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Theme     Theme?
+}
+
+model Theme {
+  id             String   @id
+  primaryColor   String
+  secondaryColor String
+  storeId        String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  Store          Store?   @relation(fields: [storeId], references: [id])
+}
+
+model User_store {
+  id        String   @id
+  name      String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
