@@ -9,14 +9,64 @@ export class StoreController{
 
     async create(req: Request, res: Response){
         const prisma = new PrismaClient();
-        const store = await prisma.store.create({
-            data: {
-                name: req.body.name,
-                themeId: null,
-                createdAt: new Date(),
-                updatedAt: new Date()
+        try {
+            const store = await prisma.store.create({
+                data: {
+                    name: req.body.nameStore,
+                    updatedAt: new Date(),
+                    typeOfStore: req.body.typeOfStore,
+                    Theme: {
+                        create: {
+                            primaryColor: req.body.primaryColor,
+                            secondaryColor: req.body.secondaryColor,
+                            updatedAt: new Date(),
+                        }
+                    },
+                    User: {
+                        create:{
+                            username: req.body.nameUser,
+                            email: req.body.email,
+                            password: req.body.password,
+                            updatedAt: new Date(),
+                        }
+                    }
+                }
+            });
+            return res.json(store);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Error inesperado",
+                error: error
+            });
+        }
+       
+    }
+
+    async show(req: Request, res: Response){
+        const prisma = new PrismaClient();
+        try {
+            const store = await prisma.store.findUnique({
+                where: {
+                    name: req.params.NameStore
+                },
+                include:{
+                    Theme: true,
+                    User: true
+                }
+            });
+            if(!store){
+                return res.status(404).json({
+                    message: "Store not found"
+                });
             }
-        });
-        res.json(store);
+            return res.json(store);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Error inesperado",
+                error: error
+            });
+        }
     }
 }

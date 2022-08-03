@@ -8,16 +8,19 @@ datasource db {
 }
 
 model Store {
-  id        String   @id
-  name      String   @unique
-  themeId   String?   @unique
-  createdAt DateTime @default(now())
+  id        String       @id @default(cuid())
+  name      String       @unique
+  User      User_store[]
+  typeOfStore typeOfStore
+  createdAt DateTime     @default(now())
   updatedAt DateTime
   Theme     Theme?
+
+   @@index([name])
 }
 
 model Theme {
-  id             String   @id
+  id             String   @id @default(cuid())
   primaryColor   String
   secondaryColor String
   storeId        String?  @unique
@@ -27,10 +30,18 @@ model Theme {
 }
 
 model User_store {
-  id        String   @id
-  name      String   @unique
+  id        String   @id @default(cuid())
+  username      String   @unique
   email     String   @unique
   password  String
+  storeId   String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime
+  Store     Store?   @relation(fields: [storeId], references: [id])
+}
+
+enum typeOfStore {
+  serviceSale
+  saleOfProducts
+  showcase
 }
