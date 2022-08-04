@@ -1,14 +1,12 @@
-import { PrismaClient } from "@prisma/client";
+import prisma  from '../prisma/lib/prisma'
 import { Request, Response } from "express";
 export class StoreController{
     async index(req: Request, res: Response){
-        const prisma = new PrismaClient();
         const stores = await prisma.store.findMany();
         res.json(stores);
     }
 
     async create(req: Request, res: Response){
-        const prisma = new PrismaClient();
         try {
             const store = await prisma.store.create({
                 data: {
@@ -44,7 +42,6 @@ export class StoreController{
     }
 
     async show(req: Request, res: Response){
-        const prisma = new PrismaClient();
         try {
             const store = await prisma.store.findUnique({
                 where: {
