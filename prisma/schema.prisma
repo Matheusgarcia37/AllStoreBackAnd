@@ -10,7 +10,7 @@ datasource db {
 model Store {
   id        String       @id @default(cuid())
   name      String       @unique
-  User      User_store[]
+  User      User[]
   typeOfStore typeOfStore
   createdAt DateTime     @default(now())
   updatedAt DateTime
@@ -29,12 +29,13 @@ model Theme {
   Store          Store?   @relation(fields: [storeId], references: [id])
 }
 
-model User_store {
+model User {
   id        String   @id @default(cuid())
   username      String   @unique
   email     String   @unique
   password  String
   storeId   String?  @unique
+  typeOfUser typeOfUser
   createdAt DateTime @default(now())
   updatedAt DateTime
   Store     Store?   @relation(fields: [storeId], references: [id])
@@ -44,4 +45,9 @@ enum typeOfStore {
   serviceSale
   saleOfProducts
   showcase
+}
+
+enum typeOfUser {
+  admin
+  user
 }

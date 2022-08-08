@@ -1,5 +1,6 @@
 import prisma  from '../prisma/lib/prisma'
 import { Request, Response } from "express";
+import bcrypt from 'bcryptjs';
 export class StoreController{
     async index(req: Request, res: Response){
         const stores = await prisma.store.findMany();
@@ -8,6 +9,29 @@ export class StoreController{
 
     async create(req: Request, res: Response){
         try {
+            const hash = await bcrypt.hash(req.body.password, 8);
+            //verifico se existe uma loja com o mesmo nome
+            const storeExist = await prisma.store.findFirst({
+                where: {
+                    name: req.body.nameStore
+                }
+            });
+            if(storeExist){
+                return res.status(400).json({
+                    error: 'Loja já existe'
+                });
+            }
+            //verifico se existe um usuário com o mesmo name
+            const userExist = await prisma.user.findFirst({
+                where: {
+                    username: req.body.nameUser
+                }
+            });
+            if(userExist){
+                return res.status(400).json({
+                    error: 'Usuário já existe'
+                });
+            }
             const store = await prisma.store.create({
                 data: {
                     name: req.body.nameStore,
@@ -24,8 +48,9 @@ export class StoreController{
                         create:{
                             username: req.body.nameUser,
                             email: req.body.email,
-                            password: req.body.password,
+                            password: hash,
                             updatedAt: new Date(),
+                            typeOfUser: "admin"
                         }
                     }
                 }
