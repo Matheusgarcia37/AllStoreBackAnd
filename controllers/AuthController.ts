@@ -6,7 +6,14 @@ class AuthController {
     async authenticate(req: Request, res: Response) {
         const { username, password } = req.body;
 
-        const user = await prisma.user.findFirst({ where: { username } });
+        const user = await prisma.user.findFirst({ where: { username }, include: {
+            Store: {
+                include: {
+                    Theme: true
+                }
+            }
+        }});
+      
 
         if (!user) {
             return res.status(400).json({
@@ -44,7 +51,11 @@ class AuthController {
             const decodeToken: any = jwt.decode(token);
             const userId = decodeToken?.id;
             const user = await prisma.user.findUnique({ where: { id: userId }, include: {
-                Store: true
+                Store: {
+                    include: {
+                        Theme: true
+                    }
+                }
             } });
             if (!user) {
                 return res.status(400).json({
