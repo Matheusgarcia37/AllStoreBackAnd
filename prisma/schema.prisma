@@ -39,7 +39,6 @@ model Address {
 model Contact {
   id        String   @id @default(cuid())
   main      Boolean  @default(false)
-  name      String
   email     String
   phone     String
   Store     Store    @relation(fields: [storeId], references: [id])
