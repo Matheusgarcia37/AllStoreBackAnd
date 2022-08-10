@@ -8,15 +8,44 @@ datasource db {
 }
 
 model Store {
-  id        String       @id @default(cuid())
-  name      String       @unique
-  User      User[]
+  id          String      @id @default(cuid())
+  name        String      @unique
+  User        User[]
   typeOfStore typeOfStore
-  createdAt DateTime     @default(now())
-  updatedAt DateTime
-  Theme     Theme?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime
+  Theme       Theme?
+  about       String
+  Address Address[]
+  Contact Contact[]
+  @@index([name])
+  Product Product[]
+}
 
-   @@index([name])
+model Address {
+  id        String   @id @default(cuid())
+  main      Boolean  @default(false)
+  street    String
+  city      String
+  state     String
+  number    String
+  zip       String
+  Store     Store    @relation(fields: [storeId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  storeId   String
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  main      Boolean  @default(false)
+  name      String
+  email     String
+  phone     String
+  Store     Store    @relation(fields: [storeId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  storeId   String
 }
 
 model Theme {
@@ -29,16 +58,37 @@ model Theme {
   Store          Store?   @relation(fields: [storeId], references: [id])
 }
 
-model User {
+model Product {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  description String
+  price       Decimal?      @default(0)
+  Store       Store         @relation(fields: [storeId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  storeId     String
+  TagProducts TagProducts[]
+}
+
+model TagProducts {
   id        String   @id @default(cuid())
-  username      String   @unique
-  email     String   @unique
-  password  String
-  storeId   String?  @unique
-  typeOfUser typeOfUser
+  name      String   @unique
+  Product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime
-  Store     Store?   @relation(fields: [storeId], references: [id])
+  productId String
+}
+
+model User {
+  id         String     @id @default(cuid())
+  username   String     @unique
+  email      String     @unique
+  password   String
+  storeId    String?    @unique
+  typeOfUser typeOfUser
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime
+  Store      Store?     @relation(fields: [storeId], references: [id])
 }
 
 enum typeOfStore {

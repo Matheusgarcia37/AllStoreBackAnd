@@ -37,6 +37,7 @@ export class StoreController{
                     name: req.body.nameStore,
                     updatedAt: new Date(),
                     typeOfStore: req.body.typeOfStore,
+                    about: req.body.about,
                     Theme: {
                         create: {
                             primaryColor: req.body.primaryColor,
