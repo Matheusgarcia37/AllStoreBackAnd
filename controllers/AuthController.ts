@@ -6,7 +6,7 @@ class AuthController {
     async authenticate(req: Request, res: Response) {
         const { username, password } = req.body;
 
-        const user = await prisma.user.findFirst({ where: { username }, include: {
+        const user = await prisma.user.findFirst({ where: { username, typeOfUser: "admin" }, include: {
             Store: {
                 include: {
                     Theme: true
