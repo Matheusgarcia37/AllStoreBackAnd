@@ -6,6 +6,7 @@ export const productsRouter = express.Router();
 
 
 productsRouter.post("/", ProductsController.product);
-productsRouter.put("/", ProductsController.alter);
+productsRouter.put("/:id", ProductsController.alter);
+productsRouter.get("/:id", ProductsController.getBydId);
 productsRouter.get("/", ProductsController.index);
 productsRouter.delete("/:id", ProductsController.delete);

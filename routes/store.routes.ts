@@ -12,6 +12,11 @@ storeRouter.get('/', (req, res) => {
 storeRouter.post('/', (req, res) => {
     storeController.create(req, res);
 });
+
 storeRouter.get('/:NameStore', (req, res) => {
     storeController.show(req, res);
+});
+
+storeRouter.get('/getById/:id', (req, res) => {
+    storeController.getById(req, res);
 });

@@ -92,4 +92,31 @@ export class StoreController{
             });
         }
     }
+
+    async getById(req: Request, res: Response){
+        try {
+            const store = await prisma.store.findUnique({
+                where: {
+                    id: req.params.id
+                },
+                include:{
+                    Theme: true,
+                    Address: true,
+                    Contact: true,
+                }
+            });
+            if(!store){
+                return res.status(404).json({
+                    message: "Store not found"
+                });
+            }
+            return res.json(store);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Error inesperado",
+                error: error
+            });
+        }
+    }
 }

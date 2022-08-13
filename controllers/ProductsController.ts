@@ -59,11 +59,63 @@ class ProductsController {
     }
 
     async alter(req: Request, res: Response) {
-        return res.json({
-            message: 'Alterado'
-        });
+        const { id } = req.params;
+        const { name, description, price, tags } = req.body;
+        try {
+            const product = await prisma.product.findUnique({
+                where: {
+                    id
+                },
+                include: {
+                    Tag: true
+                }
+            });
+            if (!product) {
+                return res.status(400).json({
+                    error: 'Product not found'
+                });
+            }
+            const priceNumber = Number(price);
+            const productExist = await prisma.product.findUnique({
+                where: {
+                    name
+                }
+            });
+            if (productExist && productExist.id !== id) {
+                return res.status(400).json({
+                    error: 'Product already exists'
+                });
+            }
+            //desconectar todas as tags antigas, e conectar as novas
+            const productAlter = await prisma.product.update({
+                where: {
+                    id
+                },
+                data: {
+                    name,
+                    description,
+                    price: priceNumber,
+                    updatedAt: new Date(),
+                    Tag: {
+                        disconnect: product.Tag.map((tag: any) => ({
+                            id: tag.id
+                        })),
+                        connect: tags.map((tag: string) => ({
+                            id: tag
+                        }))
+                    }
+                }
+            });
+            return res.json(productAlter);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Error inesperado",
+                error: error
+            });
+        }
     }
-
+                   
     async index(req: Request, res: Response) {
         const storeId = req.body;
         const products = await prisma.product.findMany({
@@ -79,6 +131,24 @@ class ProductsController {
         return res.json(products);
     }
 
+    async getBydId(req: Request, res: Response) {
+        const { id } = req.params;
+        const product = await prisma.product.findUnique({
+            where: {
+                id
+            },
+            include: {
+                Tag: true
+            }
+        });
+
+        if (!product) {
+            return res.status(400).json({
+                error: 'Product not found'
+            });
+        }
+        return res.json(product);
+    }
 
     async delete(req: Request, res: Response) {
         const { id } = req.params;
