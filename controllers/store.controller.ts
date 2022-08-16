@@ -119,4 +119,71 @@ export class StoreController{
             });
         }
     }
+
+    async update(req: Request, res: Response){
+        const { id } = req.params;
+        console.log(req.body);
+        try {
+            const store = await prisma.store.findUnique({
+                where: {
+                    id
+                },
+                include:{
+                    Address: true,
+                    Contact: true,
+                }
+            })
+            if(!store){
+                return res.status(404).json({
+                    message: "Store not found"
+                });
+            }
+            const storeAlter = await prisma.store.update({
+                where: {
+                    id
+                },
+                data: {
+                    name: req.body.name,
+                    updatedAt: new Date(),
+                    typeOfStore: req.body.typeOfStore,
+                    about: req.body.about,
+                    Theme: {
+                        update: {
+                            primaryColor: req.body.primaryColor,
+                            secondaryColor: req.body.secondaryColor,
+                            updatedAt: new Date(),
+                        }
+                    },
+                    Address: {
+                        deleteMany: {},
+                        create: req.body.Address.map((address: any) => ({
+                            street: address.street,
+                            number: address.number,
+                            city: address.city,
+                            state: address.state,
+                            zip: address.zip,
+                            main: address.main,
+                            updatedAt: new Date(),
+                        }))
+                    },
+                    Contact: {
+                        deleteMany: {},
+                        create: req.body.Contact.map((contact: any) => ({
+                            phone: contact.phone,
+                            email: contact.email,
+                            main: contact.main,
+                            updatedAt: new Date(),
+                        }))
+                    }
+                }
+            });
+            return res.json(storeAlter);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Error inesperado",
+                error: error
+            });
+        }
+    }
 }

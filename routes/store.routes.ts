@@ -20,3 +20,7 @@ storeRouter.get('/:NameStore', (req, res) => {
 storeRouter.get('/getById/:id', (req, res) => {
     storeController.getById(req, res);
 });
+
+storeRouter.put('/:id', (req, res) => {
+    storeController.update(req, res);
+});

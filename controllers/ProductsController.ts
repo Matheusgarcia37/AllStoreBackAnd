@@ -118,16 +118,37 @@ class ProductsController {
                    
     async index(req: Request, res: Response) {
         const storeId = req.body;
-        const products = await prisma.product.findMany({
-            where: {
-                Store: {
-                    id: storeId
+        const name = '';
+        const products = await prisma.$transaction([
+            prisma.product.count({
+                where: {
+                    Store: {
+                        id: storeId
+                    },
+                    name: {
+                        contains: name
+                    }
+                }
+            }),
+            prisma.product.findMany({
+                where: {
+                    Store: {
+                        id: storeId
+                    },
+                    name: {
+                        contains: name
+                    }
                 },
-            },
-            include: {
-                Tag: true
-            }
-        });
+                include: {
+                    Tag: true,
+                },
+                skip: 0,
+                take: 10,
+                orderBy: {
+                    updatedAt: 'desc'
+                }
+            })
+        ]);
         return res.json(products);
     }
 
