@@ -117,7 +117,7 @@ class ProductsController {
     }
                    
     async index(req: Request, res: Response) {
-        const storeId = req.body;
+        const { storeId, skip, limit} = req.body;
         const name = '';
         const products = await prisma.$transaction([
             prisma.product.count({
@@ -142,8 +142,8 @@ class ProductsController {
                 include: {
                     Tag: true,
                 },
-                skip: 0,
-                take: 10,
+                skip: skip,
+                take: limit,
                 orderBy: {
                     updatedAt: 'desc'
                 }
