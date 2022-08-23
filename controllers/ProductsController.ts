@@ -4,8 +4,8 @@ const prisma = new PrismaClient()
 
 class ProductsController {
     async product(req: Request, res: Response) {
-        const { name, description, price, storeId, tags } = req.body;
-
+        const { name, description, featured, price, storeId, tags } = req.body;
+        console.log(req.body)
         try {
             const store = await prisma.store.findUnique({
                 where: {
@@ -33,6 +33,7 @@ class ProductsController {
                     name,
                     description,
                     price: priceNumber,
+                    featured: featured,
                     updatedAt: new Date(),
                     Store: {
                         connect: {
@@ -60,7 +61,7 @@ class ProductsController {
 
     async alter(req: Request, res: Response) {
         const { id } = req.params;
-        const { name, description, price, tags } = req.body;
+        const { name, description, price, featured, tags } = req.body;
         try {
             const product = await prisma.product.findUnique({
                 where: {
@@ -95,6 +96,7 @@ class ProductsController {
                     name,
                     description,
                     price: priceNumber,
+                    featured: featured,
                     updatedAt: new Date(),
                     Tag: {
                         disconnect: product.Tag.map((tag: any) => ({
@@ -149,6 +151,25 @@ class ProductsController {
                 }
             })
         ]);
+        return res.json(products);
+    }
+
+    async getFeaturedProducts(req: Request, res: Response) {
+        const { storeId } = req.body;
+        const products = await prisma.product.findMany({
+            where: {
+                Store: {
+                    id: storeId
+                },
+                featured: true,
+            },
+            include: {
+                Tag: true,
+            },
+            orderBy: {
+                updatedAt: 'desc'
+            }
+        })
         return res.json(products);
     }
 

@@ -6,6 +6,7 @@ export const productsRouter = express.Router();
 
 
 productsRouter.post("/", ProductsController.product);
+productsRouter.put("/featured", ProductsController.getFeaturedProducts);
 productsRouter.put("/:id", ProductsController.alter);
 productsRouter.get("/:id", ProductsController.getBydId);
 productsRouter.put("/", ProductsController.index);
