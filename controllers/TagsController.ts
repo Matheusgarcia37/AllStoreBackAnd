@@ -66,7 +66,14 @@ class TagsController {
     }
 
     async index(req: Request, res: Response) {
-        const tags = await prisma.tag.findMany();
+        const { storeId } = req.params;
+        const tags = await prisma.tag.findMany({
+            where: {
+                Store: {
+                    id: storeId
+                }
+            }
+        });
         return res.json(tags);
     }
 

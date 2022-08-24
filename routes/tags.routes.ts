@@ -7,5 +7,5 @@ export const tagRouter = express.Router();
 
 tagRouter.post("/", TagsController.tag);
 tagRouter.put("/", TagsController.alter);
-tagRouter.get("/", TagsController.index);
+tagRouter.get("/:storeId", TagsController.index);
 tagRouter.delete("/", TagsController.delete);

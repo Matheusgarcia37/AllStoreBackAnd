@@ -9,7 +9,7 @@ class ProductsController {
         try {
             const store = await prisma.store.findUnique({
                 where: {
-                    id: storeId
+                    id: storeId,
                 }
             });
             if (!store) {
@@ -17,10 +17,13 @@ class ProductsController {
                     error: 'Store not found'
                 });
             }
-            const productExist = await prisma.product.findUnique({
+            const productExist = await prisma.product.findFirst({
                 where: {
-                    name
-                }
+                    name,
+                    Store: {
+                        id: storeId
+                    }
+                },
             });
             if (productExist) {
                 return res.status(400).json({
@@ -68,7 +71,8 @@ class ProductsController {
                     id
                 },
                 include: {
-                    Tag: true
+                    Tag: true,
+                    Store: true
                 }
             });
             if (!product) {
@@ -77,9 +81,12 @@ class ProductsController {
                 });
             }
             const priceNumber = Number(price);
-            const productExist = await prisma.product.findUnique({
+            const productExist = await prisma.product.findFirst({
                 where: {
-                    name
+                    name,
+                    Store: {
+                        id: product.Store.id
+                    }
                 }
             });
             if (productExist && productExist.id !== id) {
