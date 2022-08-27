@@ -126,38 +126,82 @@ class ProductsController {
     }
                    
     async index(req: Request, res: Response) {
-        const { storeId, skip, limit} = req.body;
-        const name = '';
-        const products = await prisma.$transaction([
-            prisma.product.count({
-                where: {
-                    Store: {
-                        id: storeId
-                    },
-                    name: {
-                        contains: name
+        const { storeId, skip, limit, tagSelected, search} = req.body;
+        let products = null;
+        if(tagSelected && tagSelected.value !== null){
+            products = await prisma.$transaction([
+                prisma.product.count({
+                    where: {
+                        Store: {
+                            id: storeId
+                        },
+                        name: {
+                            contains: search
+                        },
+                        Tag: {  
+                            some: {
+                                name: {contains: tagSelected ? tagSelected.name : ''}
+                            }
+                        }
                     }
-                }
-            }),
-            prisma.product.findMany({
-                where: {
-                    Store: {
-                        id: storeId
+                }),
+                prisma.product.findMany({
+                    where: {
+                        Store: {
+                            id: storeId
+                        },
+                        name: {
+                            contains: search
+                        },
+                        Tag: {
+                            some: {
+                                name: {contains: tagSelected ? tagSelected.name : ''}
+                            }
+                        }
                     },
-                    name: {
-                        contains: name
+                    include: {
+                        Tag: true,
+                    },
+                    skip: skip,
+                    take: limit,
+                    orderBy: {
+                        updatedAt: 'desc'
                     }
-                },
-                include: {
-                    Tag: true,
-                },
-                skip: skip,
-                take: limit,
-                orderBy: {
-                    updatedAt: 'desc'
-                }
-            })
-        ]);
+                })
+            ]);
+        } else {
+            products = await prisma.$transaction([
+                prisma.product.count({
+                    where: {
+                        Store: {
+                            id: storeId
+                        },
+                        name: {
+                            contains: search
+                        },
+                    }
+                }),
+                prisma.product.findMany({
+                    where: {
+                        Store: {
+                            id: storeId
+                        },
+                        name: {
+                            contains: search
+                        },
+                    },
+                    include: {
+                        Tag: true,
+                    },
+                    skip: skip,
+                    take: limit,
+                    orderBy: {
+                        updatedAt: 'desc'
+                    }
+                })
+            ]);
+        }
+       
         return res.json(products);
     }
 
