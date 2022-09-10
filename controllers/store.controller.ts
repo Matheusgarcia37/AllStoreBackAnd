@@ -122,7 +122,10 @@ export class StoreController{
 
     async update(req: Request, res: Response){
         const { id } = req.params;
-        console.log(req.body);
+        const { file } = req;
+        req.body.Address = JSON.parse(req.body.Address)
+        req.body.Contact = JSON.parse(req.body.Contact)
+
         try {
             const store = await prisma.store.findUnique({
                 where: {
@@ -138,44 +141,57 @@ export class StoreController{
                     message: "Store not found"
                 });
             }
+            const storeAlterData =  {
+                name: req.body.name,
+                updatedAt: new Date(),
+                typeOfStore: req.body.typeOfStore,
+                about: req.body.about,
+                Theme: {
+                    update: {
+                        primaryColor: req.body.primaryColor,
+                        secondaryColor: req.body.secondaryColor,
+                        updatedAt: new Date(),
+                    }
+                },
+                Address: {
+                    deleteMany: {},
+                    create: req.body.Address.map((address: any) => ({
+                        street: address.street,
+                        number: address.number,
+                        city: address.city,
+                        state: address.state,
+                        zip: address.zip,
+                        main: address.main,
+                        updatedAt: new Date(),
+                    }))
+                },
+                Contact: {
+                    deleteMany: {},
+                    create: req.body.Contact.map((contact: any) => ({
+                        phone: contact.phone,
+                        email: contact.email,
+                        main: contact.main,
+                        updatedAt: new Date(),
+                    }))
+                },
+                
+            }
+            if(file){
+                (storeAlterData as any).Upload = {
+                    create: {
+                        name: (file as any).originalname, 
+                        key: (file as any).key,
+                        url: (file as any).location,
+                        updatedAt: new Date(),
+                    }
+                }
+            }
+
             const storeAlter = await prisma.store.update({
                 where: {
                     id
                 },
-                data: {
-                    name: req.body.name,
-                    updatedAt: new Date(),
-                    typeOfStore: req.body.typeOfStore,
-                    about: req.body.about,
-                    Theme: {
-                        update: {
-                            primaryColor: req.body.primaryColor,
-                            secondaryColor: req.body.secondaryColor,
-                            updatedAt: new Date(),
-                        }
-                    },
-                    Address: {
-                        deleteMany: {},
-                        create: req.body.Address.map((address: any) => ({
-                            street: address.street,
-                            number: address.number,
-                            city: address.city,
-                            state: address.state,
-                            zip: address.zip,
-                            main: address.main,
-                            updatedAt: new Date(),
-                        }))
-                    },
-                    Contact: {
-                        deleteMany: {},
-                        create: req.body.Contact.map((contact: any) => ({
-                            phone: contact.phone,
-                            email: contact.email,
-                            main: contact.main,
-                            updatedAt: new Date(),
-                        }))
-                    }
-                }
+                data: storeAlterData
             });
             return res.json(storeAlter);
         } catch (error) {

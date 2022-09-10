@@ -19,9 +19,11 @@ model Store {
   Address     Address[]
   Contact     Contact[]
   Product     Product[]
+  Upload      Upload?     @relation(fields: [uploadId], references: [id])
+  uploadId    String?     @unique
 
   Tag Tag[]
-  @@index([name])
+
 }
 
 model Address {
@@ -61,7 +63,7 @@ model Theme {
 
 model Product {
   id          String   @id @default(cuid())
-  name        String   
+  name        String
   description String
   price       Decimal? @default(0)
   featured    Boolean  @default(false)
@@ -70,6 +72,20 @@ model Product {
   updatedAt   DateTime
   storeId     String
   Tag         Tag[]
+  Upload      Upload[]
+}
+
+model Upload {
+  id        String   @id @default(cuid())
+  name      String
+  key       String
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Produto   Product? @relation(fields: [produtoId], references: [id])
+  produtoId String?
+  Store     Store?
+
 }
 
 model Tag {

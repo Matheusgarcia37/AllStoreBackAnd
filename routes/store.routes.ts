@@ -1,4 +1,6 @@
 import express from 'express';
+import multer from 'multer';
+import multerConfig from '../config/multer';
 import { StoreController } from '../controllers/store.controller';
 
 
@@ -21,6 +23,6 @@ storeRouter.get('/getById/:id', (req, res) => {
     storeController.getById(req, res);
 });
 
-storeRouter.put('/:id', (req, res) => {
+storeRouter.put('/:id', multer(multerConfig).single('file'),(req, res) => {
     storeController.update(req, res);
 });
