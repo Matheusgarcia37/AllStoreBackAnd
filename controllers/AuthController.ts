@@ -9,7 +9,8 @@ class AuthController {
         const user = await prisma.user.findFirst({ where: { username, typeOfUser: "admin" }, include: {
             Store: {
                 include: {
-                    Theme: true
+                    Theme: true,
+                    Upload: true
                 }
             }
         }});
@@ -53,8 +54,9 @@ class AuthController {
             const user = await prisma.user.findUnique({ where: { id: userId }, include: {
                 Store: {
                     include: {
-                        Theme: true
-                    }
+                        Theme: true,
+                        Upload: true
+                    },
                 }
             } });
             if (!user) {
