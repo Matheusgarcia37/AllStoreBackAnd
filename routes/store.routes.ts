@@ -11,7 +11,7 @@ const storeController = new StoreController();
 storeRouter.get('/', (req, res) => {
     storeController.index(req, res);
 });
-storeRouter.post('/', (req, res) => {
+storeRouter.post('/', multer(multerConfig).single('file'), (req, res) => {
     storeController.create(req, res);
 });
 

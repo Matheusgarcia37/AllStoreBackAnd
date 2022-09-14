@@ -4,8 +4,12 @@ const prisma = new PrismaClient()
 
 class ProductsController {
     async product(req: Request, res: Response) {
+        req.body = JSON.parse(req.body.data);
         const { name, description, featured, price, storeId, tags } = req.body;
-        console.log(req.body)
+        
+        const files = req.files as Express.Multer.File[];
+        console.log(req.body, files);
+    
         try {
             const store = await prisma.store.findUnique({
                 where: {
@@ -31,24 +35,37 @@ class ProductsController {
                 });
             }
             const priceNumber = Number(price);
-            const product = await prisma.product.create({
-                data: {
-                    name,
-                    description,
-                    price: priceNumber,
-                    featured: featured,
-                    updatedAt: new Date(),
-                    Store: {
-                        connect: {
-                            id: storeId
-                        }
-                    },
-                    Tag: {
-                        connect: tags.map((tag: string) => ({
-                            id: tag
-                        }))
+
+            const productData = {
+                name,
+                description,
+                price: priceNumber,
+                featured: featured,
+                updatedAt: new Date(),
+                Store: {
+                    connect: {
+                        id: storeId
                     }
+                },
+                Tag: {
+                    connect: tags.map((tag: string) => ({
+                        id: tag
+                    }))
                 }
+            }
+
+            if(files) {
+                (productData as any).Upload = {
+                    create: files.map((file: any) => ({
+                        name: (file as any).originalname, 
+                        key: (file as any).key,
+                        url: (file as any).location,
+                        updatedAt: new Date(),
+                    }))
+                }
+            }
+            const product = await prisma.product.create({
+                data: productData
             });
 
             return res.json(product);
@@ -64,7 +81,11 @@ class ProductsController {
 
     async alter(req: Request, res: Response) {
         const { id } = req.params;
+
+        req.body = JSON.parse(req.body.data);
         const { name, description, price, featured, tags } = req.body;
+
+        const files = req.files as Express.Multer.File[];
         try {
             const product = await prisma.product.findUnique({
                 where: {
@@ -95,25 +116,38 @@ class ProductsController {
                 });
             }
             //desconectar todas as tags antigas, e conectar as novas
+            const productAlterData =  {
+                name,
+                description,
+                price: priceNumber,
+                featured: featured,
+                updatedAt: new Date(),
+                Tag: {
+                    disconnect: product.Tag.map((tag: any) => ({
+                        id: tag.id
+                    })),
+                    connect: tags.map((tag: string) => ({
+                        id: tag
+                    }))
+                }
+            }
+            console.log(files)
+            if(files) {
+                (productAlterData as any).Upload = {
+                    deleteMany: {},
+                    create: (files as any).map((file: any) => ({
+                        name: (file as any).originalname,
+                        key: (file as any).key,
+                        url: (file as any).location,
+                        updatedAt: new Date(),
+                    }))
+                }
+            }
             const productAlter = await prisma.product.update({
                 where: {
                     id
                 },
-                data: {
-                    name,
-                    description,
-                    price: priceNumber,
-                    featured: featured,
-                    updatedAt: new Date(),
-                    Tag: {
-                        disconnect: product.Tag.map((tag: any) => ({
-                            id: tag.id
-                        })),
-                        connect: tags.map((tag: string) => ({
-                            id: tag
-                        }))
-                    }
-                }
+                data: productAlterData
             });
             return res.json(productAlter);
         } catch (error) {
@@ -161,6 +195,7 @@ class ProductsController {
                     },
                     include: {
                         Tag: true,
+                        Upload: true
                     },
                     skip: skip,
                     take: limit,
@@ -192,6 +227,7 @@ class ProductsController {
                     },
                     include: {
                         Tag: true,
+                        Upload: true
                     },
                     skip: skip,
                     take: limit,
@@ -216,6 +252,7 @@ class ProductsController {
             },
             include: {
                 Tag: true,
+                Upload: true
             },
             orderBy: {
                 updatedAt: 'desc'
@@ -231,7 +268,8 @@ class ProductsController {
                 id
             },
             include: {
-                Tag: true
+                Tag: true,
+                Upload: true
             }
         });
 

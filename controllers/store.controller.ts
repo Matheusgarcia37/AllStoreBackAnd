@@ -9,6 +9,9 @@ export class StoreController{
 
     async create(req: Request, res: Response){
         try {
+            const { file } = req;
+            req.body = JSON.parse(req.body.data);
+            
             const hash = await bcrypt.hash(req.body.password, 8);
             //verifico se existe uma loja com o mesmo nome
             const storeExist = await prisma.store.findFirst({
@@ -32,29 +35,42 @@ export class StoreController{
                     error: 'Usuário já existe'
                 });
             }
-            const store = await prisma.store.create({
-                data: {
-                    name: req.body.nameStore,
-                    updatedAt: new Date(),
-                    typeOfStore: req.body.typeOfStore,
-                    about: req.body.about,
-                    Theme: {
-                        create: {
-                            primaryColor: req.body.primaryColor,
-                            secondaryColor: req.body.secondaryColor,
-                            updatedAt: new Date(),
-                        }
-                    },
-                    User: {
-                        create:{
-                            username: req.body.nameUser,
-                            email: req.body.email,
-                            password: hash,
-                            updatedAt: new Date(),
-                            typeOfUser: "admin"
-                        }
+
+            const storeData = {
+                name: req.body.nameStore,
+                updatedAt: new Date(),
+                typeOfStore: req.body.typeOfStore,
+                about: req.body.about,
+                Theme: {
+                    create: {
+                        primaryColor: req.body.primaryColor,
+                        secondaryColor: req.body.secondaryColor,
+                        updatedAt: new Date(),
+                    }
+                },
+                User: {
+                    create:{
+                        username: req.body.nameUser,
+                        email: req.body.email,
+                        password: hash,
+                        updatedAt: new Date(),
+                        typeOfUser: "admin"
                     }
                 }
+            };
+
+            if(file){
+                (storeData as any).Upload = {
+                    create: {
+                        name: (file as any).originalname, 
+                        key: (file as any).key,
+                        url: (file as any).location,
+                        updatedAt: new Date(),
+                    }
+                }
+            }
+            const store = await prisma.store.create({
+                data: storeData as any,
             });
             return res.json(store);
         } catch (error) {
@@ -75,7 +91,8 @@ export class StoreController{
                 },
                 include:{
                     Theme: true,
-                    User: true
+                    User: true,
+                    Upload: true,
                 }
             });
             if(!store){
@@ -176,6 +193,7 @@ export class StoreController{
                 },
                 
             }
+
             if(file){
                 (storeAlterData as any).Upload = {
                     create: {

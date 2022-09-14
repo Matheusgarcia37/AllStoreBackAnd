@@ -36,7 +36,7 @@ export default {
     dest: path.resolve(__dirname, '..', 'tmp', 'uploads'),
     storage: storageTypes['local'],
     limits: {
-        fileSize: 2 * 1024 * 1024,
+        fileSize: 3 * 1024 * 1024,
     },
     fileFilter: (req: any, file: any, cb: any) => {
         const allowedMimes = [
@@ -46,7 +46,8 @@ export default {
             'image/gif',
         ];
         if (!allowedMimes.includes(file.mimetype)) {
-            throw new Error('Invalid file type');
+            cb(new Error('Invalid file type.'));
+            //throw new Error('Invalid file type');
         }
 
         cb(null, true);
