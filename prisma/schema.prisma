@@ -15,7 +15,7 @@ model Store {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime
   Theme       Theme?
-  about       String   @db.VarChar(3000)       
+  about       String      @db.VarChar(3000)
   Address     Address[]
   Contact     Contact[]
   Product     Product[]
@@ -23,7 +23,6 @@ model Store {
   uploadId    String?     @unique
 
   Tag Tag[]
-
 }
 
 model Address {
@@ -85,7 +84,7 @@ model Upload {
   Produto   Product? @relation(fields: [produtoId], references: [id])
   produtoId String?
   Store     Store?
-
+  User      User?
 }
 
 model Tag {
@@ -101,13 +100,14 @@ model Tag {
 model User {
   id         String     @id @default(cuid())
   username   String     @unique
-  email      String     @unique
   password   String
   storeId    String?    @unique
   typeOfUser typeOfUser
   createdAt  DateTime   @default(now())
   updatedAt  DateTime
   Store      Store?     @relation(fields: [storeId], references: [id])
+  Upload     Upload?    @relation(fields: [uploadId], references: [id])
+  uploadId   String?    @unique
 }
 
 enum typeOfStore {

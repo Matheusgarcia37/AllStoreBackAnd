@@ -2,6 +2,9 @@ import { Router } from "express";
 import UserController from "../controllers/UserController";
 import AuthController from "../controllers/AuthController";
 import authMiddleware from "../middlewares/authMiddleware";
+import multer from 'multer';
+import multerConfig from '../config/multer';
+
 const userRouter = Router();
 
 //create user
@@ -12,6 +15,7 @@ userRouter.post("/getUserByToken", AuthController.getUserByToken);
 userRouter.post("/getUserById", UserController.getUserById);
 userRouter.get("/", authMiddleware, UserController.index);
 userRouter.delete("/", authMiddleware, UserController.delete);
+userRouter.put("/changeImageProfile/:id", authMiddleware, multer(multerConfig).single('file'), UserController.changeImageProfile);
 
 
 export default userRouter;

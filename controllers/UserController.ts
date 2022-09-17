@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 class UserController {
     async store(req: Request, res: Response) {
-        const { username, password, email, storeId, typeOfUser } = req.body;
+        const { username, password, storeId, typeOfUser } = req.body;
     
         const userExist = await prisma.user.findFirst({
             where: {
@@ -25,7 +25,6 @@ class UserController {
             data: {
                 username,
                 password: hash,
-                email: email,
                 updatedAt: new Date(),
                 typeOfUser: typeOfUser,
                 Store: {
@@ -79,7 +78,10 @@ class UserController {
         const { id } = req.body;
         try {
             const user: any = await prisma.user.findUnique({
-                where: { id }
+                where: { id },
+                include: {
+                    Upload: true
+                }
             })
             if(user){
                 delete user.password;
@@ -111,6 +113,58 @@ class UserController {
         } catch (error) {
             console.log(error);
             res.status(400).json({
+                error: 'Usuário não encontrado'
+            });
+        }
+    }
+
+    async changeImageProfile(req: Request, res: Response) {
+        const file = req.file;
+        const { id } = req.params;
+        try {
+            const user: any = await prisma.user.findUnique({
+                where: { id },
+                include: { 
+                    Upload: true
+                }
+            })
+            if(user){
+                const newUser = await prisma.user.update({
+                    where: {
+                        id
+                    },
+                    data: {
+                        Upload: {
+                            create: {
+                                name: (file as any).originalname,
+                                key: (file as any).key,
+                                url: (file as any).location,
+                                updatedAt: new Date(),
+                            }
+                        }
+                    },
+                    include: {
+                        Upload: true
+                    }
+                });
+                if(newUser && newUser.Upload) {
+                    return res.status(200).json({
+                        image: newUser.Upload.url
+                    });
+                } else {
+                    return res.status(400).json({
+                        error: 'Erro ao alterar imagem'
+                    });
+                }
+            }else {
+                return res.status(400).json({
+                    error: 'Usuário não encontrado'
+                });
+            }
+        }
+        catch (error) {
+            console.log(error);
+            return res.status(400).json({
                 error: 'Usuário não encontrado'
             });
         }

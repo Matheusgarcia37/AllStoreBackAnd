@@ -51,12 +51,30 @@ export class StoreController{
                 User: {
                     create:{
                         username: req.body.nameUser,
-                        email: req.body.email,
                         password: hash,
                         updatedAt: new Date(),
                         typeOfUser: "admin"
                     }
-                }
+                },
+                Address: {
+                    create: {
+                        main: true,
+                        street: req.body.street,
+                        city: req.body.city,
+                        state: req.body.state,
+                        number: req.body.number,
+                        zip: req.body.zip,
+                        updatedAt: new Date(),
+                    }
+                },
+                Contact: {
+                    create: {
+                        main: true,
+                        email: req.body.email,
+                        phone: req.body.phone,
+                        updatedAt: new Date(),
+                    }
+                },
             };
 
             if(file){
@@ -93,6 +111,8 @@ export class StoreController{
                     Theme: true,
                     User: true,
                     Upload: true,
+                    Address: true,
+                    Contact: true,
                 }
             });
             if(!store){
@@ -120,6 +140,7 @@ export class StoreController{
                     Theme: true,
                     Address: true,
                     Contact: true,
+                    Upload: true,
                 }
             });
             if(!store){

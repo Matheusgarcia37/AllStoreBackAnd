@@ -12,7 +12,8 @@ class AuthController {
                     Theme: true,
                     Upload: true
                 }
-            }
+            },
+            Upload: true
         }});
       
 
@@ -57,7 +58,8 @@ class AuthController {
                         Theme: true,
                         Upload: true
                     },
-                }
+                },
+                Upload: true
             } });
             if (!user) {
                 return res.status(400).json({
