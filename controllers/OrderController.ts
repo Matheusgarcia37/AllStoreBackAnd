@@ -188,7 +188,26 @@ class OrderController {
 
     async decrementProducts(req: Request, res: Response){
         const { orderId, productId } = req.body;
+        //verificar se a quantidade é maior que 1
+
         try {
+            const verifyOrder = await prisma.ordersOnProduct.findFirst({
+                where: {
+                    orderId: orderId,
+                    productId: productId,
+                },
+            });
+            
+            if(verifyOrder?.quantity === 1){
+                await prisma.ordersOnProduct.deleteMany({
+                    where: {
+                        orderId: orderId,
+                        productId: productId,
+                    }
+                });
+                return res.status(200).json({ message: "Produto removido do carrinho" });
+            }
+
             const order = await prisma.ordersOnProduct.updateMany({
                 where: {
                     orderId: orderId,
