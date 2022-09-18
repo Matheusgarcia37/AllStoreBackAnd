@@ -72,6 +72,8 @@ model Product {
   storeId     String
   Tag         Tag[]
   Upload      Upload[]
+  Orders      OrdersOnProduct[]
+
 }
 
 model Upload {
@@ -101,13 +103,37 @@ model User {
   id         String     @id @default(cuid())
   username   String     @unique
   password   String
-  storeId    String?    @unique
+  storeId    String?
   typeOfUser typeOfUser
   createdAt  DateTime   @default(now())
   updatedAt  DateTime
   Store      Store?     @relation(fields: [storeId], references: [id])
   Upload     Upload?    @relation(fields: [uploadId], references: [id])
   uploadId   String?    @unique
+  Orders     Orders[]
+}
+
+model Orders {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  User      User     @relation(fields: [userId], references: [id])
+  userId    String
+  Products OrdersOnProduct[]
+  finished Boolean @default(false)
+}
+
+model OrdersOnProduct {
+ // id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  Orders    Orders   @relation(fields: [orderId], references: [id])
+  orderId   String
+  Product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+
+  @@id([orderId, productId])
 }
 
 enum typeOfStore {

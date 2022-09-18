@@ -47,6 +47,55 @@ class AuthController {
         });
     }
 
+    async authenticateClient(req: Request, res: Response) {
+        const { username, password, storeId } = req.body;
+
+        const user = await prisma.user.findFirst({
+             where: { username, typeOfUser: "user", storeId
+            }, include: {
+                Orders: {
+                    where: {
+                        finished: false
+                    },
+                    include: {
+                        Products: {
+                            include: {
+                                Product: true
+                            }
+                        }
+                    }
+                }
+            }});
+
+        if (!user) {
+            return res.status(400).json({
+                error: 'Usuário não encontrado'
+            });
+        }
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+
+        if (!isValidPassword) {
+            return res.status(400).json({
+                error: 'Senha invalida'
+            });
+        }
+
+        const token = jwt.sign({
+            id: user.id,
+            username: user.username
+        }, process.env.APP_SECRET || '', {
+            expiresIn: '1d'
+        });
+
+        user.password = undefined as any;
+
+        return res.json({
+            user,
+            token
+        });
+    }
+
     async getUserByToken(req: Request, res: Response) {
         const { token } = req.body;
         try {
@@ -59,7 +108,19 @@ class AuthController {
                         Upload: true
                     },
                 },
-                Upload: true
+                Upload: true,
+                Orders: {
+                    where: {
+                        finished: false
+                    },
+                    include: {
+                        Products: {
+                            include: {
+                                Product: true
+                            }
+                        }
+                    }
+                }
             } });
             if (!user) {
                 return res.status(400).json({
@@ -74,6 +135,8 @@ class AuthController {
             });
         }
     }
+
+    
 }
 
 export default new AuthController();

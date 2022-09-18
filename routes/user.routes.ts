@@ -11,11 +11,13 @@ const userRouter = Router();
 userRouter.post("/", UserController.store);
 userRouter.put("/", UserController.alter);
 userRouter.post("/auth", AuthController.authenticate);
+userRouter.post("/authClient", AuthController.authenticateClient);
 userRouter.post("/getUserByToken", AuthController.getUserByToken);
 userRouter.post("/getUserById", UserController.getUserById);
 userRouter.get("/", authMiddleware, UserController.index);
 userRouter.delete("/", authMiddleware, UserController.delete);
 userRouter.put("/changeImageProfile/:id", authMiddleware, multer(multerConfig).single('file'), UserController.changeImageProfile);
+userRouter.post("/storeUserClient", UserController.storeUserClient);
 
 
 export default userRouter;

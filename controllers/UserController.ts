@@ -77,10 +77,22 @@ class UserController {
     async getUserById(req: Request, res: Response) {
         const { id } = req.body;
         try {
-            const user: any = await prisma.user.findUnique({
-                where: { id },
+            const user: any = await prisma.user.findFirst({
+                where: { id, typeOfUser: 'admin' },
                 include: {
-                    Upload: true
+                    Upload: true,
+                    Orders: {
+                        where: {
+                            finished: false
+                        },
+                        include: {
+                            Products: {
+                                include: {
+                                    Product: true,
+                                }
+                            }
+                        }
+                    }
                 }
             })
             if(user){
@@ -166,6 +178,48 @@ class UserController {
             console.log(error);
             return res.status(400).json({
                 error: 'Usuário não encontrado'
+            });
+        }
+    }
+
+    async storeUserClient(req: Request, res: Response) {
+        const { username, password, storeId } = req.body;
+        console.log(req.body)
+    
+        const userExist = await prisma.user.findFirst({
+            where: {
+                username
+            }
+        })
+        if(userExist) {
+            return res.status(400).json({
+                error: 'User already exists'
+            });
+        }
+
+        //hash password
+        const hash = await bcrypt.hash(password, 8);
+
+        try{
+            const user = await prisma.user.create({
+                data: {
+                    username,
+                    password: hash,
+                    updatedAt: new Date(),
+                    typeOfUser: 'user',
+                    Store: {
+                        connect: {
+                            id: storeId
+                        }
+                    }
+                }
+            });
+    
+            return res.json(user);
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({
+                error: 'Erro ao criar usuário'
             });
         }
     }
