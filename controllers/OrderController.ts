@@ -109,7 +109,7 @@ class OrderController {
                 });
                 return res.status(200).json({ message: "Produto adicionado ao carrinho" });
             }
-
+            console.log("aqui", existOrder);
             const order = await prisma.ordersOnProduct.create({
                 data: {
                     quantity: 1,
@@ -128,6 +128,7 @@ class OrderController {
             });
             return res.status(200).json(order);
         } catch (error: any) {
+            console.log(error);
             return res.status(400).json({ error: error.message });
         }
     }
@@ -148,11 +149,11 @@ class OrderController {
     }
 
     async finishOrder(req: Request, res: Response){
-        const { orderId } = req.params;
+        const { orderId } = req.body;
         try {
             const order = await prisma.orders.update({
                 where: {
-                    id: orderId,
+                    id: orderId
                 },
                 data: {
                     finished: true,
@@ -197,7 +198,7 @@ class OrderController {
                     productId: productId,
                 },
             });
-            
+
             if(verifyOrder?.quantity === 1){
                 await prisma.ordersOnProduct.deleteMany({
                     where: {
