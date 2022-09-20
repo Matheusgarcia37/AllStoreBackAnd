@@ -247,6 +247,44 @@ class OrderController {
                             }
                         }
                     }
+                },
+                orderBy: {
+                    updatedAt: "desc"
+                }
+            });
+            return res.status(200).json(orders);
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+    
+    async getOrdersFromStore(req: Request, res: Response){
+        const { storeId } = req.params;
+
+        try {
+            const orders = await prisma.orders.findMany({
+                where: {
+                    User: {
+                        Store: {
+                            id: storeId
+                        }
+                    },
+                    finished: true
+                },
+                include: {
+                    Products: {
+                        include: {
+                            Product: {
+                                include: {
+                                    Upload: true
+                                }
+                            }
+                        }
+                    },
+                    User: true
+                },
+                orderBy: {
+                    updatedAt: "desc"
                 }
             });
             return res.status(200).json(orders);

@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 class UserController {
     async store(req: Request, res: Response) {
         const { username, password, storeId, typeOfUser } = req.body;
-    
+        
         const userExist = await prisma.user.findFirst({
             where: {
                 username
@@ -70,8 +70,23 @@ class UserController {
     }
 
     async index(req: Request, res: Response) {
-        const users = await prisma.user.findMany();
-        return res.json(users);
+        const { storeId } = req.body;
+        try {
+            const users = await prisma.user.findMany({
+                where: {
+                    Store: {
+                        id: storeId
+                    },
+                    typeOfUser: "admin"
+                }
+            });
+            return res.status(200).json(users);
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({
+                error: 'Erro ao buscar usuários'
+            });
+        }
     }
 
     async getUserById(req: Request, res: Response) {
@@ -110,9 +125,46 @@ class UserController {
             });
         }
     }
+
+    async getUserClientById(req: Request, res: Response){
+        const { id } = req.body;
+        try {
+            const user: any = await prisma.user.findFirst({
+                where: { id, typeOfUser: 'user' },
+                include: {
+                    Upload: true,
+                    Orders: {
+                        where: {
+                            finished: false
+                        },
+                        include: {
+                            Products: {
+                                include: {
+                                    Product: true,
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+            if(user){
+                delete user.password;
+                return res.status(200).json(user);
+            }else {
+                return res.status(400).json({
+                    error: 'Usuário não encontrado'
+                });
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({
+                error: 'Usuário não encontrado'
+            });
+        }
+    }
     
     async delete(req: Request, res: Response) {
-        const { id } = req.body;
+        const { id } = req.params;
         try {
             await prisma.user.delete({
                 where: {
