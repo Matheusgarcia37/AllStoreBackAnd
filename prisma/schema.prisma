@@ -61,13 +61,13 @@ model Theme {
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   name        String
   description String
-  price       Decimal? @default(0)
-  featured    Boolean  @default(false)
-  Store       Store    @relation(fields: [storeId], references: [id])
-  createdAt   DateTime @default(now())
+  price       Decimal?          @default(0)
+  featured    Boolean           @default(false)
+  Store       Store             @relation(fields: [storeId], references: [id])
+  createdAt   DateTime          @default(now())
   updatedAt   DateTime
   storeId     String
   Tag         Tag[]
@@ -111,20 +111,35 @@ model User {
   Upload     Upload?    @relation(fields: [uploadId], references: [id])
   uploadId   String?    @unique
   Orders     Orders[]
+  Person     Person?
+}
+
+model Person {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  cpf       String
+  address    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String? @unique
 }
 
 model Orders {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+  id        String            @id @default(cuid())
+  createdAt DateTime          @default(now())
   updatedAt DateTime
-  User      User     @relation(fields: [userId], references: [id])
+  User      User              @relation(fields: [userId], references: [id])
   userId    String
-  Products OrdersOnProduct[]
-  finished Boolean @default(false)
+  Products  OrdersOnProduct[]
+  finished  Boolean           @default(false)
 }
 
 model OrdersOnProduct {
- // id        String   @id @default(cuid())
+  // id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime
   Orders    Orders   @relation(fields: [orderId], references: [id])

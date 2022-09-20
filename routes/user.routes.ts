@@ -10,6 +10,7 @@ const userRouter = Router();
 //create user
 userRouter.post("/", UserController.store);
 userRouter.put("/", UserController.alter);
+userRouter.put("/alterUserClient", UserController.alterUserClient);
 userRouter.post("/auth", AuthController.authenticate);
 userRouter.post("/authClient", AuthController.authenticateClient);
 userRouter.post("/getUserByToken", AuthController.getUserByToken);

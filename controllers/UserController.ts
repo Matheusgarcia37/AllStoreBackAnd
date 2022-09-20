@@ -70,7 +70,7 @@ class UserController {
     }
 
     async index(req: Request, res: Response) {
-        const { storeId } = req.body;
+        const { storeId } = req.params;
         try {
             const users = await prisma.user.findMany({
                 where: {
@@ -144,7 +144,8 @@ class UserController {
                                 }
                             }
                         }
-                    }
+                    },
+                    Person: true
                 }
             })
             if(user){
@@ -235,7 +236,8 @@ class UserController {
     }
 
     async storeUserClient(req: Request, res: Response) {
-        const { username, password, storeId } = req.body;
+        const { username, password, storeId } = req.body.formDataUser;
+        const { name, email, phone, cpf, address } = req.body.formDataPerson;
         console.log(req.body)
     
         const userExist = await prisma.user.findFirst({
@@ -263,6 +265,16 @@ class UserController {
                         connect: {
                             id: storeId
                         }
+                    },
+                    Person: {
+                        create: {
+                            name,
+                            email,
+                            phone,
+                            cpf,
+                            address,
+                            updatedAt: new Date(),
+                        }
                     }
                 }
             });
@@ -275,6 +287,53 @@ class UserController {
             });
         }
     }
+
+    async alterUserClient(req: Request, res: Response) {
+        const { id, username, password } = req.body.formDataUser;
+        const { name, email, phone, cpf, address } = req.body.formDataPerson;
+        try {
+            const user: any = await prisma.user.findUnique({
+                where: { id }
+            })
+            if(user){
+                user.username = username;
+                await prisma.user.update({
+                    where: {
+                        id
+                    },
+                    data: {
+                        username,
+                        password: await bcrypt.hash(password, 8),
+                        updatedAt: new Date(),
+                        Person: {
+                            update: {
+                                name,
+                                email,
+                                phone,
+                                cpf,
+                                address,
+                                updatedAt: new Date(),
+                            }
+                        }
+                    },
+                });
+                return res.status(200).json({
+                    message: 'Usuário alterado'
+                });
+            }else {
+                return res.status(400).json({
+                    error: 'Usuário não encontrado'
+                });
+            }
+        }catch (error) {
+            console.log(error);
+            return res.status(400).json({
+                error: 'Usuário não encontrado'
+            });
+        }
+    }
 }
+
+
 
 export default new UserController();
