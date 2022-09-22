@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 class ProductsController {
     async product(req: Request, res: Response) {
         req.body = JSON.parse(req.body.data);
-        const { name, description, featured, price, storeId, tags } = req.body;
+        const { name, description, featured, price, stock, storeId, tags } = req.body;
         
         const files = req.files as Express.Multer.File[];
         console.log(req.body, files);
@@ -41,6 +41,7 @@ class ProductsController {
                 description,
                 price: priceNumber,
                 featured: featured,
+                stock: Math.floor(Number(stock)),
                 updatedAt: new Date(),
                 Store: {
                     connect: {
@@ -83,7 +84,7 @@ class ProductsController {
         const { id } = req.params;
 
         req.body = JSON.parse(req.body.data);
-        const { name, description, price, featured, tags } = req.body;
+        const { name, description, price, featured, tags, stock } = req.body;
 
         const files = req.files as Express.Multer.File[];
         try {
@@ -121,6 +122,7 @@ class ProductsController {
                 description,
                 price: priceNumber,
                 featured: featured,
+                stock: Math.floor(Number(stock)),
                 updatedAt: new Date(),
                 Tag: {
                     disconnect: product.Tag.map((tag: any) => ({
