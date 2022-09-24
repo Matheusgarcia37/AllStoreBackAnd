@@ -200,7 +200,53 @@ class OrderController {
                 }
             });
 
-            getOrderToFinish.Products.forEach(async (OrderProduct: any) => {
+            return res.status(200).json(order);
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
+    async approveOrder(req: Request, res: Response){
+        const { orderId } = req.body;
+        try {
+            //verificar se os produtos tem estoque suficiente
+            const getOrderToApprove = await prisma.orders.findFirst({
+                where: {
+                    id: orderId,
+                    finished: true,
+                },
+                include: {
+                    Products: {
+                        include: {
+                            Product: true
+                        }
+                    },
+
+                }
+            });
+
+            if(getOrderToApprove){
+                getOrderToApprove.Products.forEach((OrderProduct: any) => {
+                    if(OrderProduct.Product.stock < OrderProduct.quantity){
+                        return res.status(400).json({ error: `Produto ${OrderProduct.Product.name} sem estoque` });
+                    }
+                });
+            } else {
+                return res.status(400).json({ error: "Pedido não encontrado" });
+            }
+
+            const order = await prisma.orders.update({
+                where: {
+                    id: orderId
+                },
+                data: {
+                    approved: true,
+                    updatedAt: new Date(),
+                }
+            });
+
+            //atualizar estoque
+            getOrderToApprove.Products.forEach(async (OrderProduct: any) => {
                 await prisma.product.update({
                     where: {
                         id: OrderProduct.Product.id
@@ -214,6 +260,24 @@ class OrderController {
             return res.status(200).json(order);
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
+        }
+    }
+
+    async cancelOrder(req: Request, res: Response){
+        const { orderId } = req.body;
+        try {
+            const order = await prisma.orders.update({
+                where: {
+                    id: orderId
+                },
+                data: {
+                    approved: false,
+                    updatedAt: new Date(),
+                }
+            });
+            return res.status(200).json(order);
+        } catch (error: any) {
+            return res.status(400).json({ error: error.message });  
         }
     }
 
@@ -354,7 +418,11 @@ class OrderController {
                             }
                         }
                     },
-                    User: true
+                    User: {
+                        include: {
+                            Person: true
+                        }
+                    }
                 },
                 orderBy: {
                     updatedAt: "desc"

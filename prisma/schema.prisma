@@ -137,6 +137,7 @@ model Orders {
   userId    String
   Products  OrdersOnProduct[]
   finished  Boolean           @default(false)
+  approved  Boolean?
 }
 
 model OrdersOnProduct {
