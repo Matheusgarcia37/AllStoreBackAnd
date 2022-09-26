@@ -156,7 +156,6 @@ model OrdersOnProduct {
 enum typeOfStore {
   serviceSale
   saleOfProducts
-  showcase
 }
 
 enum typeOfUser {
