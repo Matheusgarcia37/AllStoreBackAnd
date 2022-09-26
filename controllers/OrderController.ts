@@ -197,6 +197,7 @@ class OrderController {
                 data: {
                     finished: true,
                     updatedAt: new Date(),
+                    createdAt: new Date(),
                 }
             });
 
@@ -396,38 +397,70 @@ class OrderController {
     }
     
     async getOrdersFromStore(req: Request, res: Response){
-        const { storeId } = req.params;
+        const { storeId, skip, limit , status, startDate, endDate} = req.body;
+        //set start hour for start date
+        const start = new Date(startDate);
+        start.setHours(0,0,0,0);
+        //set end hour for end date
+        const end = new Date(endDate);
+        end.setHours(23,59,59,999);
 
         try {
-            const orders = await prisma.orders.findMany({
-                where: {
-                    User: {
-                        Store: {
-                            id: storeId
-                        }
-                    },
-                    finished: true
-                },
-                include: {
-                    Products: {
+            const orders = await prisma.$transaction(
+                [
+                    prisma.orders.count({
+                        where: {
+                            User: {
+                                Store: {
+                                    id: storeId
+                                }
+                            },
+                            finished: true,
+                            approved: status === "Todos" ? undefined : status,
+                            createdAt: {
+                                gte: start,
+                                lte: end
+                            }
+                        },
+                    }),
+                    prisma.orders.findMany({
+                        where: {
+                            User: {
+                                Store: {
+                                    id: storeId
+                                }
+                            },
+                            finished: true,
+                            approved: status === "Todos" ? undefined : status,
+                            createdAt: {
+                                gte: start,
+                                lte: end
+                            }
+                        },
                         include: {
-                            Product: {
+                            Products: {
                                 include: {
-                                    Upload: true
+                                    Product: {
+                                        include: {
+                                            Upload: true
+                                        }
+                                    }
+                                }
+                            },
+                            User: {
+                                include: {
+                                    Person: true
                                 }
                             }
-                        }
-                    },
-                    User: {
-                        include: {
-                            Person: true
-                        }
-                    }
-                },
-                orderBy: {
-                    updatedAt: "desc"
-                }
-            });
+                        },
+                        orderBy: {
+                            updatedAt: "desc"
+                        },
+                        skip: skip,
+                        take: limit       
+                    })
+                ]
+            );
             return res.status(200).json(orders);
         } catch (error: any) {
             return res.status(400).json({ error: error.message });
