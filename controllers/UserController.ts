@@ -9,7 +9,10 @@ class UserController {
         
         const userExist = await prisma.user.findFirst({
             where: {
-                username
+                username,
+                Store: {
+                    id: storeId
+                }
             }
         })
         if(userExist) {
@@ -242,7 +245,10 @@ class UserController {
     
         const userExist = await prisma.user.findFirst({
             where: {
-                username
+                username,
+                Store: {
+                    id: storeId
+                }
             }
         })
         if(userExist) {
