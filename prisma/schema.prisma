@@ -102,7 +102,7 @@ model Tag {
 
 model User {
   id         String     @id @default(cuid())
-  username   String     @unique
+  username   String     
   password   String
   storeId    String?
   typeOfUser typeOfUser
