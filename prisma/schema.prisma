@@ -92,7 +92,7 @@ model Upload {
 
 model Tag {
   id        String    @id @default(cuid())
-  name      String    @unique
+  name      String    
   Product   Product[]
   Store     Store     @relation(fields: [storeId], references: [id])
   storeId   String
