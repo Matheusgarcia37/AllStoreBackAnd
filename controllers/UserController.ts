@@ -10,6 +10,7 @@ class UserController {
         const userExist = await prisma.user.findFirst({
             where: {
                 username,
+                typeOfUser,
                 Store: {
                     id: storeId
                 }
@@ -42,10 +43,15 @@ class UserController {
     }
 
     async alter(req: Request, res: Response) {
-        const { id, username, password } = req.body;
+        const { id, storeId, username, password } = req.body;
         try {
-            const user: any = await prisma.user.findUnique({
-                where: { id }
+            const user: any = await prisma.user.findFirst({
+                where: {
+                    username,
+                    Store: {
+                        id: storeId
+                    }
+                }
             })
             if(user){
                 user.username = username;
@@ -164,6 +170,43 @@ class UserController {
             return res.status(400).json({
                 error: 'Usuário não encontrado'
             });
+        }
+    }
+
+    async getCustomersFromStore(req: Request, res: Response) {
+        const { storeId, skip, limit } = req.body;
+
+        try {
+            const users = await prisma.$transaction([
+                prisma.user.count({
+                    where: {
+                        Store: {
+                            id: storeId
+                        },
+                        typeOfUser: 'user'
+                    }
+                }),
+                prisma.user.findMany({
+                    where: {
+                        Store: {
+                            id: storeId
+                        },
+                        typeOfUser: 'user'
+                    },
+                    include: {
+                        Person: true
+                    },
+                    skip,
+                    take: limit
+                })
+            ]);
+
+            return res.status(200).json(users);
+        } catch (error) {
+            console.log(error);
+            return res.status(400).json({
+                error: 'Erro ao buscar clientes'
+            });  
         }
     }
     

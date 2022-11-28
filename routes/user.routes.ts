@@ -16,6 +16,7 @@ userRouter.post("/authClient", AuthController.authenticateClient);
 userRouter.post("/getUserByToken", AuthController.getUserByToken);
 userRouter.post("/getUserById", UserController.getUserById);
 userRouter.post("/getUserClientById", UserController.getUserClientById);
+userRouter.post("/getCustomersFromStore", UserController.getCustomersFromStore);
 userRouter.get("/:storeId", authMiddleware, UserController.index);
 userRouter.delete("/:id", authMiddleware, UserController.delete);
 userRouter.put("/changeImageProfile/:id", authMiddleware, multer(multerConfig).single('file'), UserController.changeImageProfile);
