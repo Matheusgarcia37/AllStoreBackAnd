@@ -184,6 +184,9 @@ export class StoreController{
                 updatedAt: new Date(),
                 typeOfStore: req.body.typeOfStore,
                 about: req.body.about,
+                facebook: req.body.facebook,
+                instagram: req.body.instagram,
+                twitter: req.body.twitter,
                 Theme: {
                     update: {
                         primaryColor: req.body.primaryColor,
@@ -212,7 +215,6 @@ export class StoreController{
                         updatedAt: new Date(),
                     }))
                 },
-                
             }
 
             if(file){

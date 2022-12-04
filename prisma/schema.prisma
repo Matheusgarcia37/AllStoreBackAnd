@@ -16,6 +16,9 @@ model Store {
   updatedAt   DateTime
   Theme       Theme?
   about       String      @db.VarChar(3000)
+  instagram   String?     @db.VarChar(100)
+  facebook    String?      @db.VarChar(100)
+  twitter     String?      @db.VarChar(100)
   Address     Address[]
   Contact     Contact[]
   Product     Product[]
